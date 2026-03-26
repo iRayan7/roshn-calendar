@@ -47,7 +47,14 @@ export async function GET(request: NextRequest) {
     return { ...m, viewership, homeTier, awayTier };
   });
 
-  const filtered = matchesWithViewership.filter((m) => m.viewership.level >= minLevel);
+  const now = new Date();
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const filtered = matchesWithViewership.filter((m) => {
+    if (m.viewership.level < minLevel) return false;
+    const matchDate = new Date(m.timestamp + "Z");
+    return matchDate >= oneWeekAgo;
+  });
 
   const ics = generateICS(filtered);
 
