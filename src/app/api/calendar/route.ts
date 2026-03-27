@@ -6,7 +6,6 @@ import { getDefaultTiers } from "@/lib/teams";
 import { CalendarSettings, MatchWithViewership, Tier, ViewershipLevel } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 3600;
 
 const VALID_TIERS = new Set(["S", "A", "B", "C"]);
 
@@ -62,7 +61,9 @@ export async function GET(request: NextRequest) {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": 'attachment; filename="spl-matches.ics"',
-      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      "Cache-Control": "public, max-age=900, s-maxage=900, stale-while-revalidate=3600",
+      "X-Event-Count": String(filtered.length),
+      "X-Total-Matches": String(matches.length),
     },
   });
 }
