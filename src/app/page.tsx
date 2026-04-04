@@ -7,8 +7,10 @@ import MatchList from "@/components/MatchList";
 import TeamTierConfig from "@/components/TeamTierConfig";
 import LeagueToggle from "@/components/LeagueToggle";
 import CalendarUrl from "@/components/CalendarUrl";
+import ChangeLog from "@/components/ChangeLog";
+import { useChangelog } from "@/hooks/useChangelog";
 
-type Tab = "matches" | "tiers" | "calendar";
+type Tab = "matches" | "tiers" | "calendar" | "logs";
 
 export default function Home() {
   const {
@@ -24,6 +26,7 @@ export default function Home() {
   const [matches, setMatches] = useState<MatchWithViewership[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("matches");
+  const { logs, loaded: logsLoaded, processMatches, clearLogs } = useChangelog();
 
   const fetchMatches = useCallback(async () => {
     if (!loaded) return;
@@ -36,13 +39,15 @@ export default function Home() {
 
       const res = await fetch(`/api/matches?${params}`);
       const data = await res.json();
-      setMatches(data.matches || []);
+      const fetchedMatches = data.matches || [];
+      setMatches(fetchedMatches);
+      processMatches(fetchedMatches);
     } catch (err) {
       console.error("Failed to fetch matches:", err);
     } finally {
       setLoading(false);
     }
-  }, [loaded, settings.leagues.roshn, settings.leagues.yelo, settings.tiers]);
+  }, [loaded, settings.leagues.roshn, settings.leagues.yelo, settings.tiers, processMatches]);
 
   useEffect(() => {
     fetchMatches();
@@ -52,6 +57,7 @@ export default function Home() {
     { id: "matches", label: "Matches" },
     { id: "tiers", label: "Team Tiers" },
     { id: "calendar", label: "Calendar URL" },
+    { id: "logs", label: `Logs${logs.length > 0 ? ` (${logs.length})` : ""}` },
   ];
 
   return (
@@ -114,6 +120,10 @@ export default function Home() {
             minLevel={settings.minLevel}
             onMinLevelChange={setMinLevel}
           />
+        )}
+
+        {activeTab === "logs" && (
+          <ChangeLog logs={logs} loading={!logsLoaded} onClear={clearLogs} />
         )}
       </main>
     </div>

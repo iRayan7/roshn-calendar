@@ -55,6 +55,29 @@ export interface CalendarSettings {
   alarmOverrides: Record<ViewershipLevel, number[]>;
 }
 
+export type ChangeType =
+  | "time_changed"
+  | "venue_changed"
+  | "status_changed"
+  | "score_updated"
+  | "match_added"
+  | "match_removed";
+
+export interface ChangeLogEntry {
+  id: string;
+  matchId: string;
+  type: ChangeType;
+  homeTeam: string;
+  awayTeam: string;
+  round: string;
+  league: "roshn" | "yelo";
+  leagueName: string;
+  description: string;
+  oldValue?: string;
+  newValue?: string;
+  detectedAt: string;
+}
+
 export interface SportsDBEvent {
   idEvent: string;
   strEvent: string;
